@@ -3,106 +3,73 @@ import pandas as pd
 from sklearn.utils import shuffle
 import numpy as np
 import torch
+import random
+from utils import handle_data_3dims, generate_data
 
-
-def str_to_int_list(s):
-    return [int(x) for x in s.split()]
-
-
-def str_list_to_int_list(slist):
-    return [str_to_int_list(s) for s in slist]
-
-
-def batch_padding(q, q_len):
-    max_len = np.max(q_len)
-    for i in range(len(q)):
-        q[i] = [0] * (max_len - q_len[i]) + q[i]
-    return np.array(q)
-
-
-def my_collate(batch):
-    q1 = [item[0] for item in batch]
-    q2 = [item[1] for item in batch]
-    q1_len = np.array([item[2] for item in batch])
-    q2_len = np.array([item[3] for item in batch])
-
-    q1 = torch.from_numpy(batch_padding(q1, q1_len)).long()
-    q2 = torch.from_numpy(batch_padding(q2, q2_len)).long()
-
-    if len(batch[0]) == 5:
-        a = torch.from_numpy(np.array([[item[4]] for item in batch])).float()
-        return [q1, q2, a]
-
-    return [q1, q2]
-
-
-class OppoQuerySet(Dataset):
-    def __init__(self, df, dataset='train'):
-
-        q1 = str_list_to_int_list(df['q1'].values)
-        q2 = str_list_to_int_list(df['q2'].values)
-        self.dataset = dataset
-
-        if dataset is not 'test':
-            a = df['label'].values
-            self.data = zip(q1, q2, a)
-        else:
-            self.data = zip(q1, q2)
-
-        self.data = list(self.data)
+class SoilActDataset(Dataset):
+    """用于振动信号所属事件识别 以及 振动所在的土质/场地识别
+    """
+    def __init__(self, data, mode='origin', use_soil = False):
+        super(SoilActDataset, self).__init__()
+        self.data = data
+        self.mode = mode
+        self.use_soil = use_soil
+        
+        if mode not in {'origin', 'combine'}:
+            raise ValueError("Unrecognized mode: {}".format(mode))
 
     def __len__(self):
         return len(self.data)
 
     def __getitem__(self, index):
-        q1, q2 = self.data[index][:2]
-        q1_len = len(q1)
-        q2_len = len(q2)
-        if self.dataset == 'test':
-            return q1, q2, q1_len, q2_len
-        else:
-            return q1, q2, q1_len, q2_len, self.data[index][2]
+        item = self.data[index] # {'data_x': .., 'data_y': .., 'data_z': .., ...}
+        
+        data = np.array([item['data_x'], item['data_y'], item['data_z']]) if self.mode=='origin' \
+            else handle_data_3dims(item)
+        
+        label = item['soil'] if self.use_soil else item['label'] # use_soil表示是否要识别土壤类别
+        
+        return data, label
 
+class Soil2ClassSet(Dataset):
+    """用于识别两个信号是否属于同一土壤的数据集(2分类)
+    """
+    def __init__(self, data, mode='origin'):
+        super(Soil2ClassSet, self).__init__()
+        sep = len(data) // 2
+        self.group1 = data[:sep]
+        self.group2 = data[sep:]
+        self.mode = mode
+        
+        if mode not in {'origin', 'combine'}:
+            raise ValueError("Unrecognized mode: {}".format(mode))
+    
+    def __len__(self):
+        return min(len(self.group1), len(self.group2))
+    
+    def __getitem__(self, index):
+        item1, item2 = self.group1[index], self.group2[index] # {'data_x': .., 'data_y': .., 'data_z': .., ...}
+        
+        data1 = np.array([item1['data_x'], item1['data_y'], item1['data_z']]) if self.mode=='origin' \
+            else handle_data_3dims(item1)
+
+        data2 = np.array([item2['data_x'], item2['data_y'], item2['data_z']]) if self.mode=='origin' \
+            else handle_data_3dims(item2)
+        
+        label = 1 if item1['label'] == item2['label'] else 0
+        return data1, data2, label
 
 if __name__ == '__main__':
-    df_train = pd.read_table("./baseline_tfidf_lr/oppo_breeno_round1_data/gaiic_track3_round1_train_20210228.tsv",
-                             names=['q1', 'q2', 'label']).fillna("0")
-    df_test = pd.read_table('./baseline_tfidf_lr/oppo_breeno_round1_data/gaiic_track3_round1_testA_20210228.tsv',
-                            names=['q1', 'q2']).fillna("0")
+    syf_data, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/syf')
+    yqcc_data, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/yqcc2')
 
-    max_value = -1
-    min_value = 999999
-    max_len = -1
-
-    trainset = OppoQuerySet(df_train, dataset='train')
-    trainloader = DataLoader(trainset, batch_size=10, shuffle=True, collate_fn=my_collate)
-    for q1, q2, a in trainloader:
-        print(q1)
-        print(q1.size())
-        print(q2)
-        print(q2.size())
-        print(a)
+    train_data = syf_data + yqcc_data
+    random.shuffle(train_data)
+    
+    # trainset = SoilActDataset(train_data, mode='origin')
+    trainset = Soil2ClassSet(train_data, mode='origin')
+    trainloader = DataLoader(trainset, batch_size=10, shuffle=True)
+    for d1, d2, l in trainloader:
+        print(d1, d2)
+        print(l)
         break
-
-    # testset = OppoQuerySet(df_test, dataset='test')
-    # # for i in range(len(trainset)):
-    # #     q1, q2, a = trainset[i]
-    # #     max_value = max(max_value, max(q1))
-    # #     max_value = max(max_value, max(q2))
-    # #     min_value = min(min_value, min(q1))
-    # #     min_value = min(min_value, min(q2))
-    # #     max_len = max(len(q1), max_len)
-    # #     max_len = max(len(q2), max_len)
-    #
-    # # for i in range(len(testset)):
-    # #     q1, q2 = testset[i]
-    # #     max_value = max(max_value, max(q1))
-    # #     max_value = max(max_value, max(q2))
-    # #     min_value = min(min_value, min(q1))
-    # #     min_value = min(min_value, min(q2))
-    # #     max_len = max(len(q1), max_len)
-    # #     max_len = max(len(q2), max_len)
-    #
-    # q1, q2, a = trainset[231]
-    #
-    # print(q1.size(), q2.size(), a)

@@ -65,7 +65,7 @@ def get_area_label(floder):
     elif 'zwy' in floder:
         return 2
     else:
-        raise ValueError("Unrecognized area: {}".format(file_name))
+        raise ValueError("Unrecognized area: {}".format(floder))
 
 def plot_time(signal, sample_rate=1, title=None):
     """matplot画图
@@ -202,13 +202,14 @@ def get_specific_data(root_path, by_txt=True, activity='dig', dis='1.0', num=1):
     data_root, txt_root = root_path + '/data', root_path + '/txt'
     total_activity = []
     file_name_list = [name for name in os.listdir(data_root) if activity in name and dis in name]
+
     for file_name in file_name_list:
         file_path = data_root + '/' + file_name
         dataXYZ = pd.read_csv(file_path, header= 0)
         data_x, data_y, data_z = list(dataXYZ.iloc[:,0]), list(dataXYZ.iloc[:, 1]), list(dataXYZ.iloc[:, 2])
         base_value = cal_base_value(dataXYZ, 32, 16, 500)
         
-        if by_txt:
+        if by_txt: # 获取 activity_list
             txt_path = txt_root + '/' + file_name[:-3] + 'txt'
             with open(txt_path, 'r') as f:
                 activity_list = f.readlines()
@@ -225,7 +226,6 @@ def get_specific_data(root_path, by_txt=True, activity='dig', dis='1.0', num=1):
         
         total_activity += activity_list
 
-    # print(activity, dis, len(total_activity))
     return random.choices(total_activity, k=num)
 
 if __name__ == '__main__':
