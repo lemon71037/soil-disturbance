@@ -1,10 +1,9 @@
 from torch.utils.data import Dataset, DataLoader
-import pandas as pd
 from sklearn.utils import shuffle
 import numpy as np
 import torch
 import random
-from utils import handle_data_3dims, generate_data
+from data_process import handle_data_3dims, generate_data
 
 class SoilActDataset(Dataset):
     """用于振动信号所属事件识别 以及 振动所在的土质/场地识别
@@ -50,11 +49,7 @@ class Soil2ClassSet(Dataset):
     def __getitem__(self, index):
         item1, item2 = self.group1[index], self.group2[index] # {'data_x': .., 'data_y': .., 'data_z': .., ...}
         
-        data1 = np.array([item1['data_x'], item1['data_y'], item1['data_z']]) if self.mode=='origin' \
-            else handle_data_3dims(item1)
-
-        data2 = np.array([item2['data_x'], item2['data_y'], item2['data_z']]) if self.mode=='origin' \
-            else handle_data_3dims(item2)
+        data1, data2 = handle_data_3dims(item1, self.mode), handle_data_3dims(item2, self.mode)
         
         label = 1 if item1['label'] == item2['label'] else 0
         return data1, data2, label
@@ -68,7 +63,7 @@ if __name__ == '__main__':
     
     # trainset = SoilActDataset(train_data, mode='origin')
     trainset = Soil2ClassSet(train_data, mode='origin')
-    trainloader = DataLoader(trainset, batch_size=10, shuffle=True)
+    trainloader = DataLoader(trainset, batch_size=2, shuffle=True)
     for d1, d2, l in trainloader:
         print(d1, d2)
         print(l)

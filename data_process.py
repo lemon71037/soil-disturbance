@@ -154,22 +154,29 @@ def cal_base_value(dataXYZ, windowSize, stepSize, length):
 
     return base_x_, base_y_, base_z_
 
-def handle_data_3dims(item):
-    """将单个切割出来的数据进行处理成 z, x2+y2, x2+y2+z2 三轴数据，均为先减基线再合成
+def handle_data_3dims(item, mode='origin'):
+    """
+    将单个切割出来的数据处理按mode处理成三轴数
+    mode: 'origin'-只减基线，'combine'-转换为x2+y2+z2, x2+y2, z三轴数据
     """
     base, angle = item['base_value'], item['angle'] # xyz的基线，以及其与g的夹角
-
     data_x, data_y, data_z = item['data_x'], item['data_y'], item['data_z']
 
-    data_xyz = np.sqrt((data_x-base[0])**2 + (data_y-base[1])**2 + (data_z-base[2])**2) # x2+y2+z2不论如何都减基线
-    data_z_rectify = data_x * np.cos(angle['x']) + data_y * np.cos(angle['y']) + data_z * np.cos(angle['z']) # 修正过的z轴数据
-    base_z = base[0] * np.cos(angle['x']) + base[0] * np.cos(angle['y']) + base[0] * np.cos(angle['z']) # 修正过的z轴baseline
-    data_xy = np.sqrt((data_x-base[0])**2 + (data_y-base[1])**2)
+    if mode == 'combine':
+        data_xyz = np.sqrt((data_x-base[0])**2 + (data_y-base[1])**2 + (data_z-base[2])**2) # x2+y2+z2不论如何都减基线
+        data_z_rectify = data_x * np.cos(angle['x']) + data_y * np.cos(angle['y']) + data_z * np.cos(angle['z']) # 修正过的z轴数据
+        base_z = base[0] * np.cos(angle['x']) + base[0] * np.cos(angle['y']) + base[0] * np.cos(angle['z']) # 修正过的z轴baseline
+        data_xy = np.sqrt((data_x-base[0])**2 + (data_y-base[1])**2)
+        data_z_rectify = data_z_rectify - base_z # 修正过的z轴数据，并减去基线
+
+        data = np.array([data_z_rectify, data_xy, data_xyz], dtype=np.float64)
+
+    elif mode == 'origin':
+        data = np.array([data_x-base[0], data_y-base[1], data_z-base[2]], dtype=np.float64)
+
+    else:
+        raise ValueError("Unrecognized mode: {}".format(mode))
     
-    data_z_rectify = data_z_rectify - base_z # 修正过的z轴数据，并减去基线
-
-    data = np.array([data_z_rectify, data_xy, data_xyz], dtype=np.float64)
-
     return data
 
 def handle_dataset_3dims(dataset, file_name_list, mode='origin'):
@@ -184,12 +191,7 @@ def handle_dataset_3dims(dataset, file_name_list, mode='origin'):
 
     for item in dataset:
         if item['file_name'] in file_name_list:
-            if mode == 'combine':
-                data.append(handle_data_3dims(item))
-            elif mode == 'origin':
-                data.append(np.array([item['data_x'], item['data_x'], item['data_x']]))
-            else:
-                raise ValueError("Unrecognized mode: {}".format(mode))
+            data.append(handle_data_3dims(item, mode))
             label.append(item['label'])
     
     data = np.array(data, dtype=np.float64)
