@@ -57,14 +57,16 @@ class Soil2ClassSet(Dataset):
 if __name__ == '__main__':
     syf_data, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/syf')
     yqcc_data, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/yqcc2')
+    zwy_data, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy')
 
-    train_data = syf_data + yqcc_data
+    train_data = syf_data + yqcc_data + zwy_data
     random.shuffle(train_data)
-    
+    print(len(train_data))
     # trainset = SoilActDataset(train_data, mode='origin')
     trainset = Soil2ClassSet(train_data, mode='origin')
-    trainloader = DataLoader(trainset, batch_size=2, shuffle=True)
+    trainloader = DataLoader(trainset, batch_size=64, shuffle=True)
+    print(len(trainloader))
     for d1, d2, l in trainloader:
-        print(d1, d2)
+        print(d1.size(), d2.size())
         print(l)
         break
