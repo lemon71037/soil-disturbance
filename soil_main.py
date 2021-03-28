@@ -12,7 +12,7 @@ from sklearn.metrics import accuracy_score
 # d_model = 64        # 扩张维度数
 # nhead = 4           # 多头数
 # dim_feedforward = 256 # 前馈神经网络数
-lr = 0.005          # learning rate
+lr = 0.005            # learning rate
 epoch = 0
 n_epochs = 100
 decay_epoch = 30
