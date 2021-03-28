@@ -23,10 +23,8 @@ class SoilActDataset(Dataset):
     def __getitem__(self, index):
         item = self.data[index] # {'data_x': .., 'data_y': .., 'data_z': .., ...}
         
-        data = np.array([item['data_x'], item['data_y'], item['data_z']]) if self.mode=='origin' \
-            else handle_data_3dims(item)
-        
-        label = item['soil'] if self.use_soil else item['label'] # use_soil表示是否要识别土壤类别
+        data = handle_data_3dims(item, self.mode)
+        label = item['area'] if self.use_soil else item['label'] # use_soil表示是否要识别土壤类别
         
         return data, label
 
@@ -60,13 +58,13 @@ if __name__ == '__main__':
     zwy_data, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy')
 
     train_data = syf_data + yqcc_data + zwy_data
-    random.shuffle(train_data)
-    print(len(train_data))
-    # trainset = SoilActDataset(train_data, mode='origin')
-    trainset = Soil2ClassSet(train_data, mode='origin')
+    # random.shuffle(train_data)
+
+    trainset = SoilActDataset(train_data, mode='origin', use_soil=True)
+    # trainset = Soil2ClassSet(train_data, mode='origin')
     trainloader = DataLoader(trainset, batch_size=64, shuffle=True)
     print(len(trainloader))
-    for d1, d2, l in trainloader:
-        print(d1.size(), d2.size())
+    for d, l in trainloader:
+        print(d.size())
         print(l)
         break

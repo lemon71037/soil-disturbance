@@ -80,12 +80,14 @@ class Soil2ClassGRUModel(nn.Module):
 
 class GRUClassifier(nn.Module):
 
-    def __init__(self, n_h=40, n_gru=2, n_ch=3, n_class=3):
+    def __init__(self, n_h=40, n_gru=2, n_ch=3, bi_d=True, n_class=3):
         super(GRUClassifier, self).__init__()
         
-        self.gru = nn.GRU(n_ch, n_h, n_gru, bidirectional=True)
+        self.gru = nn.GRU(n_ch, n_h, n_gru, bidirectional=bi_d)
+        out_ch = n_h*2 if bi_d else n_h
         self.conv = nn.Sequential(
-            self.gen_convblock(n_h*2, 16, 7, 3),
+            nn.Dropout(0.5),
+            self.gen_convblock(out_ch, 16, 7, 3),
             self.gen_convblock(16, 16, 7, 2),
             self.gen_convblock(16, 8, 7, 2),
             nn.Flatten(1, -1),
@@ -111,8 +113,41 @@ class GRUClassifier(nn.Module):
             nn.ReLU()
         )
 
+class CNNClassifier(nn.Module):
+
+    def __init__(self, n_ch=3, n_class=3):
+        super(CNNClassifier, self).__init__()
+        
+        self.conv = nn.Sequential(
+            # nn.Dropout(0.5),
+            self.gen_convblock(n_ch, 16, 3, 2),
+            self.gen_convblock(16, 32, 3, 2),
+            self.gen_convblock(32, 64, 3, 2),
+            self.gen_convblock(64, 128, 3, 2),
+            self.gen_convblock(128, 256, 3, 2),
+            self.gen_convblock(256, 256, 3, 2),
+            nn.Flatten(1, -1),
+            nn.Dropout(0.5),
+            nn.Linear(256, 128, bias=True),
+            nn.Dropout(0.5),
+            nn.Linear(128, n_class, bias=False)
+        )
+    
+    def forward(self, sig):
+
+        conved_sig = self.conv(sig)
+        return F.log_softmax(conved_sig, dim=-1)
+    
+    def gen_convblock(self, in_ch, out_ch, k_size, p_size):
+        return nn.Sequential(
+            nn.Conv1d(in_ch, out_ch, k_size, 1, (k_size-1)//2),
+            nn.AvgPool1d(p_size),
+            nn.BatchNorm1d(out_ch),
+            nn.ReLU()
+        )
+
 if __name__ == '__main__':
-    model = GRUClassifier()
+    model = CNNClassifier()
     a = torch.randn(2, 3, 96)
     b = torch.randn(2, 3, 96)
     print(model(a).size())
