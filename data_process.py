@@ -64,6 +64,10 @@ def get_area_label(floder):
         return 1
     elif 'zwy' in floder:
         return 2
+    elif 'j11' in floder:
+        return 3
+    elif 'zyq' in floder:
+        return 4
     else:
         raise ValueError("Unrecognized area: {}".format(floder))
 

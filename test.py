@@ -30,15 +30,25 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 syf2, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/syf2', factor=0)
 yqcc2, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/yqcc2_md', factor=0)
 zwy2, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy_d1', factor=0)
+# j11, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11', factor=0, by_txt=False)
+j11_2, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11_md', factor=0, by_txt=False)
+zyq, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zyq', factor=0, by_txt=False)
+zyq2, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zyq_d1', factor=0, by_txt=False)
 
-test_data = {'syf': syf2, 'yqcc': yqcc2, 'zwy': zwy2}
+test_data = {'syf': syf2, 'yqcc': yqcc2, 'zwy': zwy2, 'j11': j11_2, 'zyq': zyq2}
+
+# test_data = {'zyq': zyq, 'zyq2': zyq2}
+# test_data = {'j11': j11, 'j11_2': j11_2, 'zyq': zyq, 'zyq2': zyq2}
+act_class = 3
+soil_class = 5
+data_mode = 'combine'
 
 """ Define Model """
-soil_model = CNNClassifier()
-soil_model.load_state_dict(torch.load('state_dicts/Area3ClassModel.pth'))
+soil_model = CNNClassifier(n_class=soil_class)
+soil_model.load_state_dict(torch.load('state_dicts/Soil5ClassModel.pth'))
 soil_model = soil_model.to(device)
 
-act_model = CNNClassifier()
+act_model = CNNClassifier(n_class=act_class)
 act_model.load_state_dict(torch.load('state_dicts/Act3ClassModel.pth'))
 act_model = act_model.to(device)
 
@@ -47,15 +57,14 @@ act_model = act_model.to(device)
 act_acc = {}
 for key, value in test_data.items():
     
-    dataset = SoilActDataset(value, mode='origin', use_soil=False)
+    dataset = SoilActDataset(value, mode=data_mode, use_soil=False)
     dataloader = DataLoader(dataset, batch_size=batchSize, shuffle=False)
     act_acc[key] = model_test(act_model, dataloader)
 
 """ Soil Test """
 soil_acc = {}
 for key, value in test_data.items():
-
-    dataset = SoilActDataset(value, mode='origin', use_soil=True)
+    dataset = SoilActDataset(value, mode=data_mode, use_soil=True)
     dataloader = DataLoader(dataset, batch_size=batchSize, shuffle=False)
     soil_acc[key] = model_test(soil_model, dataloader)
 

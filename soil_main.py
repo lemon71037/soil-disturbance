@@ -17,26 +17,37 @@ epoch = 0
 n_epochs = 100
 decay_epoch = 30
 batchSize = 64
+train_mode = 'Act'
+data_mode = 'combine'
+n_class = 3 if train_mode == 'Act' else 5
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 """ Define Dataset """
 syf_train, syf_test, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/syf')
 yqcc_train, yqcc_test, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/yqcc2')
+# yqcc2_train, yqcc2_test, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/yqcc2_md')
 zwy_train, zwy_test, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy')
+# zwy2_train, zwy2_test, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy_d1')
+j11_train, j11_test, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11', by_txt=False)
+# j11_2_train, j11_2_test, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11_md', by_txt=False)
+zyq_train, zyq_test, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zyq', by_txt=False)
+# zyq2_train, zyq2_test, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zyq_d1', by_txt=False)
 
-train_data = syf_train + yqcc_train + zwy_train
-test_data = syf_test + yqcc_test + zwy_test
+train_data = syf_train + yqcc_train + zwy_train + j11_train + zyq_train
+test_data = syf_test + yqcc_test + zwy_test + j11_test + zyq_test
 
-# random.shuffle(train_data)
-# random.shuffle(test_data)
+# train_data = syf_train + yqcc_train + yqcc2_train + zwy_train + zwy2_train + j11_train + j11_2_train
+# test_data = syf_test + yqcc_test + yqcc2_test + zwy_test + zwy2_test + j11_test + j11_2_test
+# train_data = syf_train + yqcc_train + zwy_train + yqcc2_train + zwy2_train
+# test_data = syf_test + yqcc_test + zwy_test + yqcc2_test + zwy2_test
 
-trainset = SoilActDataset(train_data, mode='origin', use_soil=False)
-testset = SoilActDataset(test_data, mode='origin', use_soil=False)
+trainset = SoilActDataset(train_data, mode=data_mode, use_soil=(True if train_mode=='Soil' else False))
+testset = SoilActDataset(test_data, mode=data_mode, use_soil=(True if train_mode=='Soil' else False))
 trainloader = DataLoader(trainset, batch_size=batchSize, shuffle=True)
 testloader = DataLoader(testset, batch_size=batchSize, shuffle=False)
 
 """ Define Model """
-model = CNNClassifier()
+model = CNNClassifier(n_class=n_class)
 model.apply(weights_init_normal)
 model = model.to(device)
 # torch.save(model.state_dict(), 'state_dicts/OriginModel.pth')
@@ -106,10 +117,10 @@ for epoch in range(n_epochs):
         test_acc = test_acc / test_num
         print("Epoch: {}/{} \t test acc: {}".format(epoch, n_epochs, test_acc.item()))
 
-    if test_acc.item() > max_test_score:
+    if test_acc.item() >= max_test_score:
         print("saved new model!")
         max_test_score = test_acc.item()
-        torch.save(model.state_dict(), 'state_dicts/Act3ClassModel.pth')
+        torch.save(model.state_dict(), 'state_dicts/'+train_mode+str(n_class)+'ClassModel.pth')
     # elif test_acc.item() == max_test_score:
     #     print("never change")
     # else:
