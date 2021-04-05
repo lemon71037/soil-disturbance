@@ -33,8 +33,11 @@ j11_train, j11_test, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j1
 zyq_train, zyq_test, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zyq', by_txt=False)
 # zyq2_train, zyq2_test, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zyq_d1', by_txt=False)
 
-train_data = syf_train + yqcc_train + zwy_train + j11_train + zyq_train
-test_data = syf_test + yqcc_test + zwy_test + j11_test + zyq_test
+# train_data = syf_train + yqcc_train + zwy_train + j11_train + zyq_train
+# test_data = syf_test + yqcc_test + zwy_test + j11_test + zyq_test
+
+train_data = zwy_train
+test_data = zwy_test
 
 # train_data = syf_train + yqcc_train + yqcc2_train + zwy_train + zwy2_train + j11_train + j11_2_train
 # test_data = syf_test + yqcc_test + yqcc2_test + zwy_test + zwy2_test + j11_test + j11_2_test

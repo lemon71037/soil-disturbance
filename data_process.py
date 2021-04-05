@@ -173,7 +173,8 @@ def handle_data_3dims(item, mode='origin'):
         data_xy = np.sqrt((data_x-base[0])**2 + (data_y-base[1])**2)
         data_z_rectify = data_z_rectify - base_z # 修正过的z轴数据，并减去基线
 
-        data = np.array([data_z_rectify, data_xy, data_xyz], dtype=np.float64)
+        # data = np.array([data_z_rectify, data_xy, data_xyz], dtype=np.float64)
+        data = np.array([data_z_rectify, data_xy, data_z-base[2]], dtype=np.float64)
 
     elif mode == 'origin':
         data = np.array([data_x-base[0], data_y-base[1], data_z-base[2]], dtype=np.float64)
