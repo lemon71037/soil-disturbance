@@ -14,7 +14,7 @@ class SoilActDataset(Dataset):
         self.mode = mode
         self.use_soil = use_soil
         
-        if mode not in {'origin', 'combine'}:
+        if mode not in {'origin', 'combine', 'wavelet'}:
             raise ValueError("Unrecognized mode: {}".format(mode))
 
     def __len__(self):

@@ -4,6 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import random
 from data_split import activitySplit
+import pywt
 
 def cut_value(data, value):
     """整个数组减去某个值
@@ -158,6 +159,17 @@ def cal_base_value(dataXYZ, windowSize, stepSize, length):
 
     return base_x_, base_y_, base_z_
 
+def get_wt_features(signal, level=4):
+    """指定某一轴的信号，进行小波分解，获取特征
+    """
+    features = []
+    wp = pywt.WaveletPacket(data=signal, wavelet='db3', mode='symmetric', maxlevel=level)
+    for node in wp.get_level(level, 'freq'):
+        data = wp[node.path].data
+        features.append(data)
+    
+    return np.array(features, dtype=np.float64)
+
 def handle_data_3dims(item, mode='origin'):
     """
     将单个切割出来的数据处理按mode处理成三轴数
@@ -174,10 +186,15 @@ def handle_data_3dims(item, mode='origin'):
         data_z_rectify = data_z_rectify - base_z # 修正过的z轴数据，并减去基线
 
         # data = np.array([data_z_rectify, data_xy, data_xyz], dtype=np.float64)
-        data = np.array([data_z_rectify, data_xy, data_z-base[2]], dtype=np.float64)
+        data = np.array([cut_mean(data_xyz), cut_mean(data_xy), cut_mean(data_z_rectify)], dtype=np.float64)
 
     elif mode == 'origin':
         data = np.array([data_x-base[0], data_y-base[1], data_z-base[2]], dtype=np.float64)
+
+    elif mode == 'wavelet':
+        wt_x, wt_y, wt_z = get_wt_features(data_x-base[0]), get_wt_features(data_y-base[1]), \
+            get_wt_features(data_z-base[2])
+        data = np.array([wt_x, wt_y, wt_z])
 
     else:
         raise ValueError("Unrecognized mode: {}".format(mode))

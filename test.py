@@ -2,7 +2,7 @@ import torch
 import random
 import numpy as np
 from dataset import SoilActDataset
-from models import CNNClassifier
+from models import CNNClassifier, CNN2DClassifier
 from data_process import generate_data
 from torch.utils.data import Dataset, DataLoader
 from sklearn.metrics import accuracy_score
@@ -27,28 +27,32 @@ batchSize = 64
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 """ Define TestDataset """
+syf, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/syf', factor=0)
 syf2, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/syf2', factor=0)
+yqcc, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/yqcc2', factor=0)
 yqcc2, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/yqcc2_md', factor=0)
+zwy, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy', factor=0)
 zwy2, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy_d1', factor=0)
-# j11, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11', factor=0, by_txt=False)
+j11, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11', factor=0, by_txt=False)
 j11_2, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11_md', factor=0, by_txt=False)
 zyq, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zyq', factor=0, by_txt=False)
 zyq2, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zyq_d1', factor=0, by_txt=False)
 
-test_data = {'syf': syf2, 'yqcc': yqcc2, 'zwy': zwy2, 'j11': j11_2, 'zyq': zyq2}
+# test_data = {'syf': syf2, 'yqcc': yqcc, 'zwy': zwy2, 'j11': j11, 'zyq': zyq2}
 
-# test_data = {'zyq': zyq, 'zyq2': zyq2}
+test_data = {'syf': syf}
 # test_data = {'j11': j11, 'j11_2': j11_2, 'zyq': zyq, 'zyq2': zyq2}
 act_class = 3
 soil_class = 5
 data_mode = 'combine'
+classifer = CNN2DClassifier if data_mode=='wavelet' else CNNClassifier
 
 """ Define Model """
-soil_model = CNNClassifier(n_class=soil_class)
+soil_model = classifer(n_class=soil_class)
 soil_model.load_state_dict(torch.load('state_dicts/Soil5ClassModel.pth'))
 soil_model = soil_model.to(device)
 
-act_model = CNNClassifier(n_class=act_class)
+act_model = classifer(n_class=act_class)
 act_model.load_state_dict(torch.load('state_dicts/Act3ClassModel.pth'))
 act_model = act_model.to(device)
 

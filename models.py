@@ -146,8 +146,41 @@ class CNNClassifier(nn.Module):
             nn.ReLU()
         )
 
+class CNN2DClassifier(nn.Module):
+
+    def __init__(self, n_ch=3, n_class=3):
+        super(CNN2DClassifier, self).__init__()
+        
+        self.conv = nn.Sequential(
+            # nn.Dropout(0.5),
+            self.gen_convblock(n_ch, 16, 3, 2, 1),
+            self.gen_convblock(16, 32, 3, 2, 1),
+            self.gen_convblock(32, 64, 3, 2, 1),
+            self.gen_convblock(64, 128, 3, 2, 2),
+            self.gen_convblock(128, 256, 3, 2, 2),
+            # self.gen_convblock(256, 256, 3, 2, 2),
+            nn.Flatten(1, -1),
+            nn.Dropout(0.5),
+            nn.Linear(768, 128, bias=True),
+            nn.Dropout(0.5),
+            nn.Linear(128, n_class, bias=False)
+        )
+    
+    def forward(self, sig):
+
+        conved_sig = self.conv(sig)
+        return F.log_softmax(conved_sig, dim=-1)
+    
+    def gen_convblock(self, in_ch, out_ch, k_size, p_size, p_stride):
+        return nn.Sequential(
+            nn.Conv2d(in_ch, out_ch, k_size, 1, (k_size-1)//2),
+            nn.AvgPool2d(p_size, p_stride),
+            nn.BatchNorm2d(out_ch),
+            nn.ReLU()
+        )
+
 if __name__ == '__main__':
-    model = CNNClassifier()
-    a = torch.randn(2, 3, 96)
+    model = CNN2DClassifier()
+    a = torch.randn(2, 3, 8, 16)
     b = torch.randn(2, 3, 96)
     print(model(a).size())
