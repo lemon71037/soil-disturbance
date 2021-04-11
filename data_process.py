@@ -136,8 +136,10 @@ def generate_data(root_path, by_txt=True, shuffle=True, factor=0.2):
 def cal_base_value(dataXYZ, windowSize, stepSize, length):
     """计算采集得到信号的基线值
     """
-    data_x, data_y, data_z = list(dataXYZ.iloc[:,0]), list(dataXYZ.iloc[:, 1]), list(dataXYZ.iloc[:, 2])
     
+    data_x, data_y, data_z = list(dataXYZ.iloc[:,0]), list(dataXYZ.iloc[:, 1]), list(dataXYZ.iloc[:, 2])
+    length = min(len(data_x) // stepSize, length)
+
     base_x = []
     base_y = []
     base_z = []
@@ -153,6 +155,7 @@ def cal_base_value(dataXYZ, windowSize, stepSize, length):
     base_x.sort()
     base_y.sort()
     base_z.sort()
+
     base_x_ = (base_x[int(0.25*length)] + base_x[int(0.75*length)]) / 2
     base_y_ = (base_y[int(0.25*length)] + base_y[int(0.75*length)]) / 2
     base_z_ = (base_z[int(0.25*length)] + base_z[int(0.75*length)]) / 2
@@ -220,7 +223,7 @@ def handle_dataset_3dims(dataset, file_name_list, mode='origin'):
     label = np.array(label)
     return data, label
 
-def get_specific_data(root_path, by_txt=True, activity='dig', dis='1.0', num=1):
+def get_specific_data(root_path, by_txt=True, activity='dig', dis='1.0', num=None):
     """具体取出某距离上发生的某事件信号
     """
     data_root, txt_root = root_path + '/data', root_path + '/txt'
@@ -250,7 +253,10 @@ def get_specific_data(root_path, by_txt=True, activity='dig', dis='1.0', num=1):
         
         total_activity += activity_list
 
-    return random.choices(total_activity, k=num)
+    if num is not None:
+        return random.choices(total_activity, k=num)
+    else:
+        return total_activity
 
 if __name__ == '__main__':
     root = 'E:/研一/嗑盐/土壤扰动/dataset/zwy_d1'

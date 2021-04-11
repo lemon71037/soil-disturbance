@@ -35,12 +35,14 @@ zwy, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy', factor=0)
 zwy2, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy_d1', factor=0)
 j11, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11', factor=0, by_txt=False)
 j11_2, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11_md', factor=0, by_txt=False)
+j11_md, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11_49', factor=0, by_txt=False)
 zyq, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zyq', factor=0, by_txt=False)
 zyq2, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zyq_d1', factor=0, by_txt=False)
 
 # test_data = {'syf': syf2, 'yqcc': yqcc, 'zwy': zwy2, 'j11': j11, 'zyq': zyq2}
 
-test_data = {'syf': syf}
+test_data = {'syf': syf, 'syf2': syf2, 'yqcc': yqcc, 'yqcc2': yqcc2, 'zwy': zwy, 'zwy2': zwy2, 'j11': j11, \
+    'j11_2': j11_2, 'j11_md': j11_md, 'zyq': zyq, 'zyq2': zyq2}
 # test_data = {'j11': j11, 'j11_2': j11_2, 'zyq': zyq, 'zyq2': zyq2}
 act_class = 3
 soil_class = 5

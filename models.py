@@ -78,6 +78,36 @@ class Soil2ClassGRUModel(nn.Module):
         print(cat_sig.size())
         return self.decoder(cat_sig)
 
+class TransformerClassifier(nn.Module):
+    
+    def __init__(self, d_model=64, nhead=4, dim_feedforward=256, n_class=3):
+        super(TransformerClassifier, self).__init__()
+        encoder_layer = nn.TransformerEncoderLayer(d_model=d_model, nhead=nhead, dim_feedforward=dim_feedforward)
+        self.expend_dims = nn.Sequential(
+            nn.Conv1d(3, d_model, kernel_size=1, stride=1, padding=0),
+            nn.ReLU()
+        )
+        self.encoder = nn.Sequential(
+            PositionalEncoding(d_model),
+            nn.TransformerEncoder(encoder_layer, 3)  # seq_len, bs, 3
+        )
+        self.decoder = nn.Sequential(
+            nn.Linear(d_model, n_class)
+        )
+    
+    def forward(self, sig):
+        """ sig1/sig2: shape=(bs, ch, len)
+        """
+        ex_sig = self.expend_dims(sig)
+        # |ex_sig|: (bs, nkernel, len)
+        ex_sig = ex_sig.permute(2, 0, 1)
+        # |ex_sig|: (len, bs, nkernel)
+        encoded_sig = self.encoder(ex_sig)[-1]
+        # |cat_sig|: (bs, d_model * 2)
+
+        return F.log_softmax(self.decoder(encoded_sig), dim=-1)
+
+
 class GRUClassifier(nn.Module):
 
     def __init__(self, n_h=40, n_gru=2, n_ch=3, bi_d=True, n_class=3):
