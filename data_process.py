@@ -99,6 +99,7 @@ def generate_data(root_path, by_txt=True, shuffle=True, factor=0.2):
     """
     data_root, txt_root = root_path + '/data', root_path + '/txt'
     train_data, test_data = [], []
+    file_data_dict = {}
 
     file_name_list = os.listdir(data_root)
 
@@ -130,8 +131,9 @@ def generate_data(root_path, by_txt=True, shuffle=True, factor=0.2):
         
         test_data = test_data + activity_list[: int(factor * len(activity_list))]
         train_data = train_data + activity_list[int(factor * len(activity_list)): ]
+        file_data_dict[file_name] = activity_list
     
-    return train_data, test_data, file_name_list
+    return train_data, test_data, file_name_list, file_data_dict
 
 def cal_base_value(dataXYZ, windowSize, stepSize, length):
     """计算采集得到信号的基线值
