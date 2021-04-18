@@ -27,10 +27,8 @@ class MiniRocketImage():
         X = X[:, 0, :].astype(np.float32)
         _, n_timepoints = X.shape # for soil disturbance, 96
 
-        dilations, num_features_per_dilation = _fit_dilation(n_timepoints, self.num_kernels, \
-            self.num_features, self.max_dilations_per_kernel)
-        biases = _fit_biases(X, self.indices, dilations, num_features_per_dilation, self.random_state)
-        self.parameters = (dilations, num_features_per_dilation, biases)
+        self.parameters = _fit(X, self.indices, n_timepoints, self.num_kernels, self.num_features, \
+            self.max_dilations_per_kernel, self.random_state)
         return self
     
     def transform(self, X):
@@ -38,7 +36,23 @@ class MiniRocketImage():
         """
         X = X[:, 0, :].astype(np.float32)
         return _transform(X, self.indices, self.parameters)
+    
+    def fit_transform(self, X):
+        X = X[:, 0, :].astype(np.float32)
+        _, n_timepoints = X.shape # for soil disturbance, 96
+        self.parameters = _fit(X, self.indices, n_timepoints, self.num_kernels, self.num_features, \
+            self.max_dilations_per_kernel, self.random_state)
+        return _transform(X, self.indices, self.parameters)
 
+def _fit(X, indices, n_timepoints, num_kernels, num_features, max_dilations_per_kernel, random_state):
+    dilations, num_features_per_dilation = _fit_dilation(n_timepoints, num_kernels, num_features, max_dilations_per_kernel)
+    biases = _fit_biases(X, indices, dilations, num_features_per_dilation, random_state)
+    return dilations, num_features_per_dilation, biases
+
+def _quantiles(n):
+    return np.array(
+        [(_ * ((np.sqrt(5) + 1) / 2)) % 1 for _ in range(1, n + 1)], dtype=np.float32
+    )
 
 def _fit_dilation(n_timepoints, num_kernels, num_features, max_dilations_per_kernel):
     """Fits dilations per kernel & features per dilations
@@ -141,9 +155,6 @@ def _fit_biases(X, indices, dilations, num_features_per_dilation, seed):
         num_features_this_dilation = num_features_per_dilation[dilation_index]
         
         for kernel_index in range(num_kernels):
-
-            feature_index_end = feature_index_start + num_features_this_dilation
-
             for example_index in range(n_instances):
                 _X = X[example_index]
 
@@ -157,8 +168,13 @@ def _fit_biases(X, indices, dilations, num_features_per_dilation, seed):
                 max_match = max(C) if max(C) > max_match else max_match
                 min_match = min(C) if min(C) < min_match else min_match
 
-            biases[feature_index_start:feature_index_end] = np.linspace(min_match, max_match, \
-                feature_index_end-feature_index_start+2)[1:-1]
+        fixed_min_match = min_match + 0.25 * (max_match-min_match)
+        fixed_max_match = min_match + 0.75 * (max_match-min_match)
+
+        for kernel_index in range(num_kernels):
+            feature_index_end = feature_index_start + num_features_this_dilation
+            biases[feature_index_start:feature_index_end] = np.linspace(fixed_min_match, fixed_max_match, \
+                num_features_this_dilation)
 
             feature_index_start = feature_index_end
 
