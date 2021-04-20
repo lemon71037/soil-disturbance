@@ -1,3 +1,4 @@
+from numpy.lib.function_base import average
 import torch
 import random
 import numpy as np
@@ -5,7 +6,45 @@ from dataset import SoilActDataset
 from models import CNNClassifier, CNN2DClassifier
 from data_process import generate_data
 from torch.utils.data import Dataset, DataLoader
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, precision_score
+
+def test_eachfile(model, data, filename, area, data_mode, n_class=3, use_soil=False):
+    file_result = []
+    for name in filename:
+        file_dataset = []
+
+        for item in data:
+            if item['file_name'] == name:
+                file_dataset.append(item)
+        
+        dataset = SoilActDataset(file_dataset, mode=data_mode, use_soil=use_soil)
+        dataloader = DataLoader(dataset, batch_size=batchSize, shuffle=False)
+        
+        test_acc, test_precision = model_test_detail(model, dataloader, n_class)
+        file_result.apend({'area':area, 'name': name, 'acc': test_acc, 'precision': test_precision})
+    
+    return file_result
+
+def model_test_detail(model, dataloader, n_class=3):
+    model.eval()
+    test_acc = 0.0
+    test_presion = [0.0] * n_class
+    test_num = len(dataloader)
+    
+    with torch.no_grad():
+        for i, (sig, label) in enumerate(dataloader):
+            sig, label = sig.float().to(device), label.long().to(device)
+
+            pred = torch.argmax(model(sig), dim=1).cpu()
+            acc = accuracy_score(label.cpu(), pred)
+            precision = precision_score(label, pred, average=None)
+            test_presion = [(test_presion[i] + precision[i]) for i in range(n_class)]
+            test_acc += acc
+        
+        test_acc /= test_num
+        test_presion /= test_num
+    
+    return test_acc, test_presion
 
 def model_test(model, dataloader):
     model.eval()
