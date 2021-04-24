@@ -260,6 +260,17 @@ def get_specific_data(root_path, by_txt=True, activity='dig', dis='1.0', num=Non
     else:
         return total_activity
 
+def cal_snr(s, n):
+    """估计信号的信噪比，Ps/Pn（没有将x与n分开，并非精确SNR）
+    inputs:
+        s: 原始时间序列 np.array
+        n: 噪声序列 np.array
+    returns:
+        snr: 估计的信噪比
+    """
+    return np.sum(s**2) / np.sum(n**2)
+
+
 if __name__ == '__main__':
     root = 'E:/研一/嗑盐/土壤扰动/dataset/zwy_d1'
     print(get_specific_data(root))
