@@ -12,7 +12,7 @@ from sklearn.metrics import accuracy_score, precision_score
 def model_test(model, dataloader, n_class=3):
     model.eval()
     test_acc = [0.0] * n_class
-    test_num = len(dataloader)
+    test_num  = len(dataloader)
     
     with torch.no_grad():
         for i, (sig, label) in enumerate(dataloader):
@@ -42,7 +42,8 @@ _, _, _, yqcc_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/yqcc2'
 _, _, _, yqcc2_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/yqcc2_md', factor=0)
 _, _, _, zwy_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy', factor=0)
 _, _, _, zwy2_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy_d1', factor=0)
-_, _, _, zwy3_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy_md', factor=0, by_txt=False)
+_, _, _, zwy3_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy2', factor=0, by_txt=False)
+_, _, _, zwy4_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy3', factor=0, by_txt=False)
 _, _, _, j11_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11', factor=0, by_txt=False)
 _, _, _, j11_2_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11_md', factor=0, by_txt=False)
 _, _, _, j11_md_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11_49', factor=0, by_txt=False)
@@ -51,7 +52,7 @@ _, _, _, zyq2_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zyq_d1
 print("generating data finishing...")
 
 test_data = {'syf': syf_dict, 'syf2': syf2_dict, 'yqcc': yqcc_dict, 'yqcc2': yqcc2_dict, 
-            'zwy': zwy_dict, 'zwy2': zwy2_dict, 'zwy3': zwy3_dict, 'j11': j11_dict,
+            'zwy': zwy_dict, 'zwy2': zwy2_dict, 'zwy3': zwy3_dict, 'zwy4': zwy4_dict, 'j11': j11_dict,
             'j11_2': j11_2_dict, 'j11_md': j11_md_dict, 'zyq': zyq_dict, 'zyq2': zyq2_dict}
 
 act_model = classifer(n_class=act_class)

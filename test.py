@@ -72,11 +72,13 @@ _, _, _, yqcc_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/yqcc2'
 _, _, _, yqcc2_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/yqcc2_md', factor=0)
 # zwy, _, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy', factor=0)
 # zwy2, _, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy_d1', factor=0)
+# zwy3, _, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy2', factor=0, by_txt=False)
+# zwy4, _, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy3', factor=0, by_txt=False)
 # j11, _, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11', factor=0, by_txt=False)
 # j11_2, _, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11_md', factor=0, by_txt=False)
 # j11_md, _, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11_49', factor=0, by_txt=False)
-_, _, _, zyq_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zyq', factor=0, by_txt=False)
-_, _, _, zyq2_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zyq_d1', factor=0, by_txt=False)
+# _, _, _, zyq_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zyq', factor=0, by_txt=False)
+# _, _, _, zyq2_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zyq_d1', factor=0, by_txt=False)
 
 # test_data = {'syf': syf2, 'yqcc': yqcc, 'zwy': zwy2, 'j11': j11, 'zyq': zyq2}
 
