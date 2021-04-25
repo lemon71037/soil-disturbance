@@ -27,6 +27,7 @@ def model_test(model, dataloader, n_class=3):
     
     return test_acc
 
+snr = 5
 batchSize = 64
 act_class = 3
 # soil_class = 5
@@ -36,19 +37,19 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 """ Define TestDataset """
 print("generating data...")
-_, _, _, syf_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/syf', factor=0)
-_, _, _, syf2_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/syf2', factor=0)
-_, _, _, yqcc_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/yqcc2', factor=0)
-_, _, _, yqcc2_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/yqcc2_md', factor=0)
-_, _, _, zwy_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy', factor=0)
-_, _, _, zwy2_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy_d1', factor=0)
-_, _, _, zwy3_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy2', factor=0, by_txt=False)
-_, _, _, zwy4_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy3', factor=0, by_txt=False)
-_, _, _, j11_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11', factor=0, by_txt=False)
-_, _, _, j11_2_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11_md', factor=0, by_txt=False)
-_, _, _, j11_md_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11_49', factor=0, by_txt=False)
-_, _, _, zyq_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zyq', factor=0, by_txt=False)
-_, _, _, zyq2_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zyq_d1', factor=0, by_txt=False)
+_, _, _, syf_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/syf', factor=0, snr=snr)
+_, _, _, syf2_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/syf2', factor=0, snr=snr)
+_, _, _, yqcc_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/yqcc2', factor=0, snr=snr)
+_, _, _, yqcc2_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/yqcc2_md', factor=0, snr=snr)
+_, _, _, zwy_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy', factor=0, snr=snr)
+_, _, _, zwy2_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy_d1', factor=0, snr=snr)
+_, _, _, zwy3_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy2', factor=0, by_txt=False, snr=snr)
+_, _, _, zwy4_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy3', factor=0, by_txt=False, snr=snr)
+_, _, _, j11_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11', factor=0, by_txt=False, snr=snr)
+_, _, _, j11_2_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11_md', factor=0, by_txt=False, snr=snr)
+_, _, _, j11_md_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11_49', factor=0, by_txt=False, snr=snr)
+_, _, _, zyq_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zyq', factor=0, by_txt=False, snr=snr)
+_, _, _, zyq2_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zyq_d1', factor=0, by_txt=False, snr=snr)
 print("generating data finishing...")
 
 test_data = {'syf': syf_dict, 'syf2': syf2_dict, 'yqcc': yqcc_dict, 'yqcc2': yqcc2_dict, 

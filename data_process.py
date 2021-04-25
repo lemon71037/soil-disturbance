@@ -91,7 +91,7 @@ def cal_angles(base_value):
             'y': np.arctan(np.sqrt(base_value[0]**2 + base_value[2]**2) / base_value[1]),
             'z': np.arctan(np.sqrt(base_value[0]**2 + base_value[1]**2) / base_value[2])}
 
-def generate_data(root_path, by_txt=True, shuffle=True, factor=0.2):
+def generate_data(root_path, by_txt=True, shuffle=True, factor=0.2, snr=5):
     """
     根据打好标签的 txt 文件导入数据，并按文件来划分训练集以及测试集
     其中训练集，测试集默认按 0.8 0.2 比例划分
@@ -119,21 +119,45 @@ def generate_data(root_path, by_txt=True, shuffle=True, factor=0.2):
         else:
             activity_list = [int(np.mean(idx)) for idx in activitySplit(dataXYZ, 32, 16, 500)]
 
-        activity_list = [{'data_x': np.array(extract_data_from_center(data_x, center, base_value[0])),
-                        'data_y': np.array(extract_data_from_center(data_y, center, base_value[1])),
-                        'data_z': np.array(extract_data_from_center(data_z, center, base_value[2])),
-                        'label': get_activity_label(file_name), 'file_name': file_name, 'base_value':base_value,
-                        'angle': cal_angles(base_value), 'area': get_area_label(root_path) }
-                        for center in activity_list]
+        new_list = []
+        for center in activity_list:
+            item = {'data_x': np.array(extract_data_from_center(data_x, center, base_value[0])),
+                    'data_y': np.array(extract_data_from_center(data_y, center, base_value[1])),
+                    'data_z': np.array(extract_data_from_center(data_z, center, base_value[2])),
+                    'label': get_activity_label(file_name), 'file_name': file_name, 'base_value':base_value,
+                    'angle': cal_angles(base_value), 'area': get_area_label(root_path) }
+            
+            noise_z = np.array(extract_data_from_center(data_z, center-128, base_value[2]))
+            item['snr'] = cal_snr(item['data_z']-item['base_value'][2], noise_z-item['base_value'][2])
+
+            
+            new_list.append(item)
+        # activity_list = [{'data_x': np.array(extract_data_from_center(data_x, center, base_value[0])),
+        #                 'data_y': np.array(extract_data_from_center(data_y, center, base_value[1])),
+        #                 'data_z': np.array(extract_data_from_center(data_z, center, base_value[2])),
+        #                 'label': get_activity_label(file_name), 'file_name': file_name, 'base_value':base_value,
+        #                 'angle': cal_angles(base_value), 'area': get_area_label(root_path) }
+        #                 for center in activity_list]
         
+        file_data_dict[file_name] = filter_by_snr(new_list)
+
         if shuffle:
-            random.shuffle(activity_list)
+            random.shuffle(new_list)
         
-        test_data = test_data + activity_list[: int(factor * len(activity_list))]
-        train_data = train_data + activity_list[int(factor * len(activity_list)): ]
-        file_data_dict[file_name] = activity_list
+        test_data = test_data + new_list[: int(factor * len(new_list))]
+        train_data = train_data + new_list[int(factor * len(new_list)): ]
+        
+    return filter_by_snr(train_data, snr), filter_by_snr(test_data, snr), file_name_list, file_data_dict
+
+def filter_by_snr(act_list, snr=5):
+    """根据信噪比 SNR 筛选数据
+    """
+    new_list = []
+    for item in act_list:
+        if item['snr'] > snr:
+            new_list.append(item)
     
-    return train_data, test_data, file_name_list, file_data_dict
+    return new_list
 
 def cal_base_value(dataXYZ, windowSize, stepSize, length):
     """计算采集得到信号的基线值
@@ -268,7 +292,12 @@ def cal_snr(s, n):
     returns:
         snr: 估计的信噪比
     """
-    return np.sum(s**2) / np.sum(n**2)
+    result = 0
+    try:
+        result = np.sum(s**2) / np.sum(n**2)
+    except RuntimeWarning:
+        print(n)
+    return result
 
 
 if __name__ == '__main__':

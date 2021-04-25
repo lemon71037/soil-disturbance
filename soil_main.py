@@ -4,7 +4,7 @@ import numpy as np
 import torch.nn.functional as F
 from dataset import SoilActDataset
 from models import CNNClassifier, CNN2DClassifier, TransformerClassifier
-from data_process import generate_data
+from data_process import generate_data, filter_by_snr
 from torch.utils.data import Dataset, DataLoader
 from utils import LambdaLR, Logger, weights_init_normal
 from sklearn.metrics import accuracy_score
@@ -17,6 +17,7 @@ epoch = 0
 n_epochs = 100
 decay_epoch = 30
 batchSize = 64
+snr = 5
 train_mode = 'Act'
 data_mode = 'combine'
 n_class = 3 if train_mode == 'Act' else 5
@@ -24,23 +25,25 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 """ Define Dataset """
 print("generating data...")
-# syf_train, syf_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/syf')
-# yqcc_train, yqcc_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/yqcc2')
-# yqcc2_train, yqcc2_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/yqcc2_md')
-# zwy_train, zwy_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy')
-# zwy2_train, zwy2_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy_d1')
-zwy3_train, zwy3_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy2', by_txt=False)
-zwy4_train, zwy4_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy3', by_txt=False)
-# j11_train, j11_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11', by_txt=False)
-# j11_2_train, j11_2_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11_md', by_txt=False)
-# j11_md_train, j11_md_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11_49', by_txt=False)
-# zyq_train, zyq_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zyq', by_txt=False)
-# zyq2_train, zyq2_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zyq_d1', by_txt=False)
+# syf_train, syf_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/syf', snr=snr)
+# yqcc_train, yqcc_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/yqcc2', snr=snr)
+# yqcc2_train, yqcc2_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/yqcc2_md', snr=snr)
+zwy_train, zwy_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy', snr=snr)
+zwy2_train, zwy2_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy_d1', snr=snr)
+zwy3_train, zwy3_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy2', by_txt=False, snr=snr)
+zwy4_train, zwy4_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy3', by_txt=False, snr=snr)
+# j11_train, j11_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11', by_txt=False, snr=snr)
+# j11_2_train, j11_2_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11_md', by_txt=False, snr=snr)
+# j11_md_train, j11_md_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11_49', by_txt=False, snr=snr)
+# zyq_train, zyq_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zyq', by_txt=False, snr=snr)
+# zyq2_train, zyq2_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zyq_d1', by_txt=False, snr=snr)
 print("generating data finishing...")
 
-train_data = zwy3_train + zwy4_train
-test_data = zwy4_test + zwy3_test
+train_data = zwy3_train + zwy4_train + zwy_train + zwy2_train
+test_data = zwy4_test + zwy3_test + zwy_test + zwy2_test
 
+print("total train data: ", len(train_data))
+print("total test data: ", len(test_data))
 # train_data = j11_md_train
 # test_data = j11_md_test
 

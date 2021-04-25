@@ -4,7 +4,7 @@ import random
 import numpy as np
 from dataset import SoilActDataset
 from models import CNNClassifier, CNN2DClassifier
-from data_process import generate_data
+from data_process import filter_by_snr, generate_data
 from torch.utils.data import Dataset, DataLoader
 from sklearn.metrics import accuracy_score, precision_score
 
@@ -54,8 +54,8 @@ def model_test(model, dataloader):
     with torch.no_grad():
         for i, (sig, label) in enumerate(dataloader):
             sig, label = sig.float().to(device), label.long().to(device)
-            pred = model(sig)
-            acc = accuracy_score(torch.argmax(pred, dim=1).cpu(), label.cpu())
+            pred = torch.argmax(model(sig), dim=1).cpu()
+            acc = accuracy_score((pred==0), (label==0).cpu())
             test_acc += acc.item()
         
         test_acc /= test_num
@@ -66,17 +66,17 @@ batchSize = 64
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 """ Define TestDataset """
-# syf, _, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/syf', factor=0)
-# syf2, _, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/syf2', factor=0)
-_, _, _, yqcc_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/yqcc2', factor=0)
-_, _, _, yqcc2_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/yqcc2_md', factor=0)
-# zwy, _, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy', factor=0)
-# zwy2, _, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy_d1', factor=0)
+syf, _, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/syf', factor=0)
+syf2, _, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/syf2', factor=0)
+yqcc, _, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/yqcc2', factor=0)
+yqcc2, _, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/yqcc2_md', factor=0)
+zwy, _, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy', factor=0)
+zwy2, _, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy_d1', factor=0)
 # zwy3, _, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy2', factor=0, by_txt=False)
 # zwy4, _, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy3', factor=0, by_txt=False)
-# j11, _, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11', factor=0, by_txt=False)
-# j11_2, _, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11_md', factor=0, by_txt=False)
-# j11_md, _, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11_49', factor=0, by_txt=False)
+j11, _, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11', factor=0, by_txt=False)
+j11_2, _, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11_md', factor=0, by_txt=False)
+j11_md, _, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11_49', factor=0, by_txt=False)
 # _, _, _, zyq_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zyq', factor=0, by_txt=False)
 # _, _, _, zyq2_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zyq_d1', factor=0, by_txt=False)
 
@@ -85,7 +85,15 @@ _, _, _, yqcc2_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/yqcc2
 # test_data = {'syf': syf, 'syf2': syf2, 'yqcc': yqcc, 'yqcc2': yqcc2, 'zwy': zwy, 'zwy2': zwy2, 'j11': j11, \
     # 'j11_2': j11_2, 'j11_md': j11_md, 'zyq': zyq, 'zyq2': zyq2}
 # test_data = {'j11': j11, 'j11_2': j11_2, 'zyq': zyq, 'zyq2': zyq2}
-test_data = yqcc2_dict
+# test_data = {'zwy': filter_by_snr(zwy,10), 'zwy2': filter_by_snr(zwy2,10)}
+
+origin_data = {'syf': syf, 'syf2': syf2, 'yqcc': yqcc, 'yqcc2': yqcc2, \
+                'zwy': zwy, 'zwy2': zwy2, 'j11': j11, 'j11_2': j11_2, 'j11_md': j11_md}
+
+snr = 5
+test_data = {}
+for key, item in origin_data.items():
+    test_data[key] = filter_by_snr(item, snr)
 
 act_class = 3
 soil_class = 5
