@@ -299,6 +299,14 @@ def cal_snr(s, n):
         print(n)
     return result
 
+def data_resample(s, m=1):
+    """降采样操作，m表示隔几个点采样一次，采样过程中不作滤波处理
+    """
+    result = []
+    for i in range(0, len(s), m+1):
+        result.append(s[i])
+    
+    return result
 
 if __name__ == '__main__':
     root = 'E:/研一/嗑盐/土壤扰动/dataset/zwy_d1'
