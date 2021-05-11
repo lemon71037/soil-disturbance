@@ -70,7 +70,7 @@ def get_area_label(floder):
     elif 'zyq' in floder:
         return 4
     else:
-        raise ValueError("Unrecognized area: {}".format(floder))
+        return 5
 
 def plot_time(signal, sample_rate=1, title=None):
     """matplot画图
@@ -127,7 +127,7 @@ def generate_data(root_path, by_txt=True, shuffle=True, factor=0.2, snr=5):
                     'label': get_activity_label(file_name), 'file_name': file_name, 'base_value':base_value,
                     'angle': cal_angles(base_value), 'area': get_area_label(root_path) }
             
-            noise_z = np.array(extract_data_from_center(data_z, center-128, base_value[2]))
+            noise_z = np.array(extract_data_from_center(data_z, center+96, base_value[2]))
             item['snr'] = cal_snr(item['data_z']-item['base_value'][2], noise_z-item['base_value'][2])
 
             

@@ -25,7 +25,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 """ Define Dataset """
 print("generating data...")
-# syf_train, syf_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/syf', snr=snr)
+syf_train, syf_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/syf', snr=snr)
 # yqcc_train, yqcc_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/yqcc2', snr=snr)
 # yqcc2_train, yqcc2_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/yqcc2_md', snr=snr)
 zwy_train, zwy_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy', snr=snr)
@@ -37,10 +37,11 @@ zwy4_train, zwy4_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/datas
 # j11_md_train, j11_md_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11_49', by_txt=False, snr=snr)
 # zyq_train, zyq_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zyq', by_txt=False, snr=snr)
 # zyq2_train, zyq2_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zyq_d1', by_txt=False, snr=snr)
+j7lqc_train, j7lqc_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j7lqc', by_txt=False, snr=snr)
 print("generating data finishing...")
 
-train_data = zwy3_train + zwy4_train + zwy_train + zwy2_train
-test_data = zwy4_test + zwy3_test + zwy_test + zwy2_test
+train_data = zwy3_train + zwy4_train + zwy_train + zwy2_train + syf_train + j7lqc_train
+test_data = zwy4_test + zwy3_test + zwy_test + zwy2_test + syf_test + j7lqc_test
 
 print("total train data: ", len(train_data))
 print("total test data: ", len(test_data))
