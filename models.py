@@ -210,7 +210,7 @@ class CNN2DClassifier(nn.Module):
         )
 
 if __name__ == '__main__':
-    model = CNN2DClassifier()
+    model = CNNClassifier()
     a = torch.randn(2, 3, 8, 16)
     b = torch.randn(2, 3, 96)
-    print(model(a).size())
+    print(model(b).size())

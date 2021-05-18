@@ -41,6 +41,7 @@ j11, _, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11', factor
 j11_2, _, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11_md', factor=0, by_txt=False, snr=snr)
 j11_md, _, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11_49', factor=0, by_txt=False, snr=snr)
 j7lqc, _, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j7lqc', factor=0, by_txt=False, snr=snr)
+sky, _, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/sky', factor=0, by_txt=False, snr=snr)
 # _, _, _, zyq_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zyq', factor=0, by_txt=False)
 # _, _, _, zyq2_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zyq_d1', factor=0, by_txt=False)
 
@@ -51,8 +52,8 @@ j7lqc, _, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j7lqc', fa
 # test_data = {'j11': j11, 'j11_2': j11_2, 'zyq': zyq, 'zyq2': zyq2}
 # test_data = {'zwy': filter_by_snr(zwy,10), 'zwy2': filter_by_snr(zwy2,10)}
 
-origin_data = {'syf': syf, 'syf2': syf2, 'yqcc': yqcc, 'yqcc2': yqcc2, 'zwy': zwy,
-                'zwy2': zwy2, 'j11': j11, 'j11_2': j11_2, 'j11_md': j11_md, 'j7lqc': j7lqc}
+origin_data = {'syf': syf, 'syf2': syf2, 'yqcc': yqcc, 'yqcc2': yqcc2, 'zwy': zwy, 'zwy2': zwy2, 
+                'j11': j11, 'j11_2': j11_2, 'j11_md': j11_md, 'j7lqc': j7lqc, 'sky': sky}
 
 test_data = {}
 for key, item in origin_data.items():

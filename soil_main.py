@@ -26,22 +26,28 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 """ Define Dataset """
 print("generating data...")
 syf_train, syf_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/syf', snr=snr)
-# yqcc_train, yqcc_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/yqcc2', snr=snr)
-# yqcc2_train, yqcc2_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/yqcc2_md', snr=snr)
+yqcc_train, yqcc_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/yqcc2', snr=snr)
+yqcc2_train, yqcc2_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/yqcc2_md', snr=snr)
 zwy_train, zwy_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy', snr=snr)
 zwy2_train, zwy2_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy_d1', snr=snr)
 zwy3_train, zwy3_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy2', by_txt=False, snr=snr)
 zwy4_train, zwy4_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zwy3', by_txt=False, snr=snr)
-# j11_train, j11_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11', by_txt=False, snr=snr)
-# j11_2_train, j11_2_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11_md', by_txt=False, snr=snr)
-# j11_md_train, j11_md_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11_49', by_txt=False, snr=snr)
+j11_train, j11_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11', by_txt=False, snr=snr)
+j11_2_train, j11_2_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11_md', by_txt=False, snr=snr)
+j11_md_train, j11_md_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11_49', by_txt=False, snr=snr)
 # zyq_train, zyq_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zyq', by_txt=False, snr=snr)
 # zyq2_train, zyq2_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zyq_d1', by_txt=False, snr=snr)
 j7lqc_train, j7lqc_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j7lqc', by_txt=False, snr=snr)
+sky_train, sky_test, _, _ = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j7lqc', by_txt=False, snr=snr)
 print("generating data finishing...")
 
-train_data = zwy3_train + zwy4_train + zwy_train + zwy2_train + syf_train + j7lqc_train
-test_data = zwy4_test + zwy3_test + zwy_test + zwy2_test + syf_test + j7lqc_test
+train_data = syf_train + yqcc_train + yqcc2_train + zwy_train + zwy2_train + zwy3_train + zwy4_train + \
+    j11_train + j11_2_train + j11_md_train + j7lqc_train + sky_train
+
+test_data = syf_test + yqcc_test + yqcc2_test + zwy_test + zwy2_test + zwy3_test + zwy4_test + \
+    j11_test + j11_2_test + j11_md_test + j7lqc_test + sky_test
+# train_data = zwy3_train + zwy4_train + zwy_train + zwy2_train + syf_train + j7lqc_train
+# test_data = zwy4_test + zwy3_test + zwy_test + zwy2_test + syf_test + j7lqc_test
 
 print("total train data: ", len(train_data))
 print("total test data: ", len(test_data))
@@ -62,28 +68,6 @@ testloader = DataLoader(testset, batch_size=batchSize, shuffle=False)
 model = CNN2DClassifier(n_class=n_class) if data_mode=='wavelet' else CNNClassifier(n_class=n_class)
 model.apply(weights_init_normal)
 model = model.to(device)
-# torch.save(model.state_dict(), 'state_dicts/OriginModel.pth')
-# origin = Soil2ClassModel(d_model, nhead, dim_feedforward)
-# origin.load_state_dict(torch.load('state_dicts/OriginModel.pth'))
-
-# for name, p in model.named_parameters():
-#     print(name, p.size())
-
-# model.eval()
-# test_acc = 0.0
-# test_num = len(testloader)
-# with torch.no_grad():
-#     # print(model.named_parameters() == origin.named_parameters())
-#     for i, (sig1, sig2, label) in enumerate(testloader):
-#         sig1, sig2, label = sig1.float().to(device), \
-#             sig2.float().to(device), label.long().to(device)
-    
-#         pred = model(sig1, sig2)
-#         acc = accuracy_score(torch.argmax(pred, dim=1).cpu(), label.cpu())
-#         test_acc += acc
-    
-#     test_acc = test_acc / test_num
-#     print("Origin test acc: {}".format(test_acc.item()))
 
 """ Define Optim and Criterion"""
 optim = torch.optim.SGD(model.parameters(), lr=lr, weight_decay=0.001)
@@ -110,7 +94,6 @@ for epoch in range(n_epochs):
         optim.zero_grad()
         loss.backward()
         optim.step()
-        # for x in optim.param_groups[0]['params']:
         acc = accuracy_score(torch.argmax(pred, dim=1).cpu(), label.cpu())
         logger.log({"loss": loss, "acc": acc})
         
@@ -118,7 +101,7 @@ for epoch in range(n_epochs):
 
     model.eval()
     with torch.no_grad():
-        # print(model.named_parameters() == origin.named_parameters())
+
         for i, (sig, label) in enumerate(testloader):
             sig, label = sig.float().to(device), label.long().to(device)
         
@@ -133,9 +116,5 @@ for epoch in range(n_epochs):
         print("New model saved!")
         max_test_score = test_acc.item()
         torch.save(model.state_dict(), 'state_dicts/'+train_mode+str(n_class)+'ClassModel.pth')
-    # elif test_acc.item() == max_test_score:
-    #     print("never change")
-    # else:
-    #     print("???")
 
 print("The final test acc: {}".format(max_test_score))

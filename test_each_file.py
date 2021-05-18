@@ -51,12 +51,13 @@ _, _, _, j11_md_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j11_
 _, _, _, zyq_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zyq', factor=0, by_txt=False, snr=snr)
 _, _, _, zyq2_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/zyq_d1', factor=0, by_txt=False, snr=snr)
 _, _, _, j7lqc_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/j7lqc', factor=0, by_txt=False, snr=snr)
+_, _, _, sky_dict = generate_data('E:/研一/嗑盐/土壤扰动/dataset/sky', factor=0, by_txt=False, snr=snr)
 print("generating data finishing...")
 
 test_data = {'syf': syf_dict, 'syf2': syf2_dict, 'yqcc': yqcc_dict, 'yqcc2': yqcc2_dict, 
             'zwy': zwy_dict, 'zwy2': zwy2_dict, 'zwy3': zwy3_dict, 'zwy4': zwy4_dict, 'j11': j11_dict,
             'j11_2': j11_2_dict, 'j11_md': j11_md_dict, 'zyq': zyq_dict, 'zyq2': zyq2_dict, 
-            'j7lqc': j7lqc_dict}
+            'j7lqc': j7lqc_dict, 'sky': sky_dict}
 
 act_model = classifer(n_class=act_class)
 act_model.load_state_dict(torch.load('state_dicts/Act3ClassModel.pth'))
